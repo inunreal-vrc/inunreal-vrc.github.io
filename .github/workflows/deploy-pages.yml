@@ -33,7 +33,6 @@ jobs:
       - name: Ensure LFS assets are materialized
         run: |
           set -euo pipefail
-          git lfs install --local
           git lfs pull
           git lfs checkout
 
