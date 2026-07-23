@@ -46,13 +46,12 @@ jobs:
           fi
 
           while IFS= read -r file; do
-            [[ -n "$file" ]] || continue
-            candidate_file="${GITHUB_WORKSPACE}/${file}"
-            if git lfs pointer --check --file="$candidate_file" >/dev/null 2>&1; then
+            [[ "$file" == assets/* ]] || continue
+            if git lfs pointer --check --file="$file" >/dev/null 2>&1; then
               echo "❌ LFS pointer detected in deploy payload: $file"
               exit 1
             fi
-          done < <(git lfs ls-files -n | grep '^assets/' || true)
+          done < <(git lfs ls-files -n)
 
           mkdir -p _site/assets
           cp -R assets/. _site/assets/
