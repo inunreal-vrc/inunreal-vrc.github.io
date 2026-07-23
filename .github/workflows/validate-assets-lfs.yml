@@ -1,0 +1,53 @@
+name: Validate static assets and Git LFS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate-assets-lfs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure git-lfs is available
+        run: |
+          git lfs install --local
+
+      - name: Validate static assets location and LFS tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          static_ext_regex='\.(png|jpe?g|gif|webp|svg|avif|ico|mp4|webm|mov|mp3|wav|pdf|zip)$'
+          failed=0
+
+          while IFS= read -r -d '' file; do
+            lower_file="${file,,}"
+
+            if [[ ! "$lower_file" =~ $static_ext_regex ]]; then
+              continue
+            fi
+
+            if [[ "$file" != assets/* ]]; then
+              echo "❌ Static asset must be under /assets: $file"
+              failed=1
+            fi
+
+            if ! git check-attr filter -- "$file" | grep -q 'filter: lfs'; then
+              echo "❌ Static asset is not tracked by Git LFS: $file"
+              failed=1
+            fi
+          done < <(git ls-files -z)
+
+          if [[ "$failed" -ne 0 ]]; then
+            exit 1
+          fi
+
+          echo "✅ Static assets are in /assets and tracked by Git LFS"
