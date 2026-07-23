@@ -40,23 +40,19 @@ jobs:
       - name: Prepare Pages artifact
         run: |
           set -euo pipefail
-          failed=0
 
           if [[ ! -d assets ]]; then
             echo "❌ Missing /assets directory in repository root"
             exit 1
           fi
 
-          while IFS= read -r -d '' file; do
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
             if git lfs pointer --check --file="$file" >/dev/null 2>&1; then
               echo "❌ LFS pointer detected in deploy payload: $file"
-              failed=1
+              exit 1
             fi
-          done < <(find assets -type f ! -name '.gitkeep' -print0)
-
-          if [[ "$failed" -ne 0 ]]; then
-            exit 1
-          fi
+          done < <(git lfs ls-files -n | grep '^assets/' || true)
 
           mkdir -p _site/assets
           cp -R assets/. _site/assets/
