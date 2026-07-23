@@ -42,8 +42,13 @@ jobs:
           set -euo pipefail
           failed=0
 
+          if [[ ! -d assets ]]; then
+            echo "❌ Missing /assets directory in repository root"
+            exit 1
+          fi
+
           while IFS= read -r -d '' file; do
-            if head -n 1 "$file" | grep -q '^version https://git-lfs.github.com/spec/v1$'; then
+            if git lfs pointer --check --file="$file" >/dev/null 2>&1; then
               echo "❌ LFS pointer detected in deploy payload: $file"
               failed=1
             fi
