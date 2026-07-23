@@ -27,10 +27,32 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Ensure LFS assets are materialized
+        run: |
+          set -euo pipefail
+          git lfs pull
+          git lfs checkout
 
       - name: Prepare Pages artifact
         run: |
           set -euo pipefail
+
+          if [[ ! -d assets ]]; then
+            echo "❌ Missing assets directory"
+            exit 1
+          fi
+
+          while IFS= read -r file; do
+            [[ "$file" == assets/* ]] || continue
+            if git lfs pointer --check --file="$file" >/dev/null 2>&1; then
+              echo "❌ LFS pointer detected in deploy payload: $file"
+              exit 1
+            fi
+          done < <(git lfs ls-files -n)
+
           mkdir -p _site/assets
           cp -R assets/. _site/assets/
           cp index.html _site/index.html
