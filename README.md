@@ -13,6 +13,7 @@ Example path in repository:
 Public URL pattern:
 
 - `https://raw.githubusercontent.com/inunreal-vrc/inunreal-vrc.github.io/main/assets/images/banner.png`
+- `https://inunreal-vrc.github.io/assets/images/banner.png` (GitHub Pages)
 
 ## Git LFS setup
 
@@ -31,3 +32,7 @@ A GitHub Actions workflow validates that:
 
 1. Static asset files are placed under `/assets`
 2. Matching static asset files are tracked by Git LFS
+
+## GitHub Pages deploy
+
+This repository deploys to GitHub Pages on push to `main` via `.github/workflows/deploy-pages.yml`.
