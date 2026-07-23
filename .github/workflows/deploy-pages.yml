@@ -41,7 +41,7 @@ jobs:
           set -euo pipefail
 
           if [[ ! -d assets ]]; then
-            echo "❌ Missing /assets directory in repository root"
+            echo "❌ Missing assets directory"
             exit 1
           fi
 
